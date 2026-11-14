@@ -1,4 +1,4 @@
-from conexion import cursor
+from conexion import cursor, conexion
 
 class Clientes:
     def __init__(self, razon, contacto, telefono, email):
@@ -37,7 +37,7 @@ class Clientes:
         return self.__telefono
 
     @telefono.setter
-    def _telefono(self, value):
+    def telefono(self, value):
         self.__telefono = value
 
     @property
@@ -59,15 +59,15 @@ class Clientes:
     def insertar(self):
         try:
             cursor.execute("insert into clientes values(null, %s, %s, %s, %s)", (self.razon, self.contacto, self.telefono, self.email))
-            cursor.commit()
+            conexion.commit()
             return True
         except:
             return False
 
-    def actulizar(self, id):
+    def actualizar(self, id):
         try:
-            cursor.execute("update clientes set razon_social = %s, persona_contacto = %s, telefono = %s, email = %s where id = s%", (self.razon, self.contacto, self.telefono, id))
-            cursor.commit()
+            cursor.execute("update clientes set razon_social = %s, persona_contacto = %s, telefono = %s, email = %s where id_cliente = %s", (self.razon, self.contacto, self.telefono, self.email, id))
+            conexion.commit()
             return True
         except:
             return False
@@ -75,8 +75,8 @@ class Clientes:
     @staticmethod
     def eliminar(id):
         try:
-            cursor.execute("delete from clientes where id = %s", (id))
-            cursor.commit()
+            cursor.execute("delete from clientes where id_cliente = %s", (id,))
+            conexion.commit()
             return True
         except:
-            return False
+            return False

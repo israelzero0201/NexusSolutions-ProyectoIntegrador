@@ -1,4 +1,4 @@
-from conexion import cursor
+from conexion import cursor, conexion
 
 class Trabajadores:
     def __init__(self, nombre, usuario, contrasena, rol, especialidad, status):
@@ -8,15 +8,24 @@ class Trabajadores:
         self._rol = rol
         self._especialidad = especialidad
         self._status = status
+        self._sesion = False
 
     def iniciarSesion(self):
-        pass
+        try:
+            cursor.execute("select id_trabajadores from trabajadores where usuario = %s and contrasena = %s and status = 'activo'", (self.usuario, self.contrasena))
+            self._sesion = cursor.fetchone() is not None
+            return self._sesion
+        except:
+            self._sesion = False
+            return False
 
     def cerrarSesion(self):
-        pass
+        self._sesion = False
+        return True
 
     def detalle(self):
-        pass
+        especialidad = self.especialidad if self.especialidad else "N/A"
+        return f"Nombre: {self.nombre} | Usuario: {self.usuario} | Rol: {self.rol} | Especialidad: {especialidad} | Status: {self.status}"
 
     @property
     def nombre(self):
@@ -63,29 +72,33 @@ class Trabajadores:
         return self._status
 
     @status.setter
-    def stutus(self, value):
+    def status(self, value):
         self._status = value
+
+    @property
+    def sesion(self):
+        return self._sesion
 
     @staticmethod
     def consultar():
         try:
-            cursor.execute("select * from trabajadores")
+            cursor.execute("select id_trabajadores, nombre, usuario, rol, especialidad, status from trabajadores")
             return cursor.fetchall()
         except:
             return []
 
     def insertar(self):
         try:
-            cursor.execute("insert into trabajadores values(null, %s, %s, %s, %s, %s, %s)", (self.nombre, self.usuario, self.contrasena, self.rol, self.especialidad, self.status))
-            cursor.commit()
+            cursor.execute("insert into trabajadores (nombre, usuario, contrasena, rol, especialidad, status) values (%s, %s, %s, %s, %s, %s)", (self.nombre, self.usuario, self.contrasena, self.rol, self.especialidad or None, self.status))
+            conexion.commit()
             return True
         except:
             return False
 
-    def actulizar(self, id):
+    def actualizar(self, id):
         try:
-            cursor.execute("update trabajadores set nombre = %s, usuario = %s, contrasena = %s, rol = %s, especialidad = %s, status = %s where id = s%", (self.nombre, self.usuario, self.contrasena, self.rol, self.especialidad, self.status))
-            cursor.commit()
+            cursor.execute("update trabajadores set nombre = %s, usuario = %s, contrasena = %s, rol = %s, especialidad = %s, status = %s where id_trabajadores = %s", (self.nombre, self.usuario, self.contrasena, self.rol, self.especialidad or None, self.status, id))
+            conexion.commit()
             return True
         except:
             return False
@@ -93,11 +106,8 @@ class Trabajadores:
     @staticmethod
     def eliminar(id):
         try:
-            cursor.execute("delete from trabajadores where id = %s", (id))
-            cursor.commit()
+            cursor.execute("delete from trabajadores where id_trabajadores = %s", (id,))
+            conexion.commit()
             return True
         except:
             return False
-
-
-        

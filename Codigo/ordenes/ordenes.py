@@ -1,7 +1,8 @@
-from conexion import cursor
+from conexion import cursor, conexion
 
 class ordenTrabajo:
-    def __init__(self, tipo, direccionSitio, descripcion, fechaProgramada, horaInicio, status, montoTotal, anticipoPagado):
+    def __init__(self, idCliente, tipo, direccionSitio, descripcion, fechaProgramada, horaInicio, status, montoTotal, anticipoPagado):
+        self._idCliente = idCliente
         self._tipo = tipo
         self._direccionSitio = direccionSitio
         self._descripcion = descripcion
@@ -12,22 +13,102 @@ class ordenTrabajo:
         self._anticipoPagado = anticipoPagado
 
     def crearOrden(self):
-        pass
+        try:
+            cursor.execute("insert into ordenes_info (id_cliente, tipo, direccion_sitio, descripcion, fecha_programada, hora_inicio, status, monto_total, anticipo_pagado) values (%s, %s, %s, %s, %s, %s, %s, %s, %s)", self._datos())
+            conexion.commit()
+            return True
+        except:
+            return False
 
-    def asignarTecnico(self):
-        pass
+    def actualizarOrden(self, id):
+        try:
+            cursor.execute("update ordenes_info set id_cliente = %s, tipo = %s, direccion_sitio = %s, descripcion = %s, fecha_programada = %s, hora_inicio = %s, status = %s, monto_total = %s, anticipo_pagado = %s where id_orden = %s", self._datos() + (id,))
+            conexion.commit()
+            return True
+        except:
+            return False
 
-    def ctualizarTecnico(self):
-        pass
+    @staticmethod
+    def asignarTecnico(idOrden, idTrabajador):
+        try:
+            cursor.execute("insert into ordenes_tecnicos (id_trabajadores, id_orden_trabajo) values (%s, %s)", (idTrabajador, idOrden))
+            cursor.execute("update ordenes_info set status = 'asignada' where id_orden = %s and status = 'pendiente'", (idOrden,))
+            conexion.commit()
+            return True
+        except:
+            conexion.rollback()
+            return False
 
-    def registrarConclusion(self):
-        pass
+    @staticmethod
+    def actualizarTecnico(idOrden, idTrabajador):
+        try:
+            cursor.execute("select 1 from ordenes_tecnicos where id_orden_trabajo = %s", (idOrden,))
+            if len(cursor.fetchall()) == 0:
+                return False
+            cursor.execute("update ordenes_tecnicos set id_trabajadores = %s where id_orden_trabajo = %s", (idTrabajador, idOrden))
+            conexion.commit()
+            return True
+        except:
+            conexion.rollback()
+            return False
 
-    def cancelarOrden(self):
-        pass
+    @staticmethod
+    def registrarConclusion(idOrden):
+        try:
+            if ordenTrabajo._estado(idOrden) not in ("asignada", "en_proceso"):
+                return False
+            cursor.execute("update ordenes_info set status = 'concluida' where id_orden = %s", (idOrden,))
+            conexion.commit()
+            return True
+        except:
+            return False
 
-    def eliminarOrden(self):
-        pass
+    @staticmethod
+    def cancelarOrden(idOrden):
+        try:
+            if ordenTrabajo._estado(idOrden) in (None, "concluida", "cancelada"):
+                return False
+            cursor.execute("update ordenes_info set status = 'cancelada' where id_orden = %s", (idOrden,))
+            conexion.commit()
+            return True
+        except:
+            return False
+
+    @staticmethod
+    def eliminarOrden(idOrden):
+        try:
+            cursor.execute("delete from ordenes_info where id_orden = %s", (idOrden,))
+            conexion.commit()
+            return True
+        except:
+            return False
+
+    @staticmethod
+    def consultar():
+        try:
+            cursor.execute("select o.id_orden, o.id_cliente, o.tipo, o.direccion_sitio, o.descripcion, o.fecha_programada, o.hora_inicio, o.status, o.monto_total, o.anticipo_pagado, t.nombre from ordenes_info o left join ordenes_tecnicos ot on ot.id_orden_trabajo = o.id_orden left join trabajadores t on t.id_trabajadores = ot.id_trabajadores order by o.id_orden")
+            return cursor.fetchall()
+        except:
+            return []
+
+    @staticmethod
+    def _estado(idOrden):
+        cursor.execute("select status from ordenes_info where id_orden = %s", (idOrden,))
+        fila = cursor.fetchone()
+        if fila is None:
+            return None
+        return fila[0]
+
+    def _datos(self):
+        return (self.idCliente, self.tipo, self.direccionSitio, self.descripcion or None, self.fechaProgramada or None, self.horaInicio or None, self.status, self.montoTotal or 0, self.anticipoPagado)
+
+    @property
+    def idCliente(self):
+        return self._idCliente
+
+    @idCliente.setter
+    def idCliente(self, value):
+        self._idCliente = value
 
     @property
     def tipo(self):
@@ -92,4 +173,3 @@ class ordenTrabajo:
     @anticipoPagado.setter
     def anticipoPagado(self, value):
         self._anticipoPagado = value
-

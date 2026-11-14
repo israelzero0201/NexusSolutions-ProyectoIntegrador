@@ -10,4 +10,4 @@ try:
     cursor = conexion.cursor(buffered=True)
 
 except:
-    print("...!Por el Momento no se puede conectarse con la base de datos, intente más tarde...!")
+    print("...!Por el Momento no se puede conectarse con la base de datos, intente más tarde...!")
