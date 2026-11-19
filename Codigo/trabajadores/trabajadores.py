@@ -1,4 +1,4 @@
-from conexion import cursor, conexion
+from conexion import cursor
 
 class Trabajadores:
     def __init__(self, nombre, usuario, contrasena, rol, especialidad, status):
@@ -10,14 +10,13 @@ class Trabajadores:
         self._status = status
         self._sesion = False
 
-    def iniciarSesion(self):
+    @staticmethod
+    def iniciarSesion(usuario, contrasena):
         try:
-            cursor.execute("select id_trabajadores from trabajadores where usuario = %s and contrasena = %s and status = 'activo'", (self.usuario, self.contrasena))
-            self._sesion = cursor.fetchone() is not None
-            return self._sesion
+            cursor.execute("select id_trabajadores, usuario, rol from trabajadores where usuario = %s and contrasena = %s and status = 'activo'", (usuario, contrasena))
+            return cursor.fetchone()
         except:
-            self._sesion = False
-            return False
+            return []
 
     def cerrarSesion(self):
         self._sesion = False
@@ -90,7 +89,7 @@ class Trabajadores:
     def insertar(self):
         try:
             cursor.execute("insert into trabajadores (nombre, usuario, contrasena, rol, especialidad, status) values (%s, %s, %s, %s, %s, %s)", (self.nombre, self.usuario, self.contrasena, self.rol, self.especialidad or None, self.status))
-            conexion.commit()
+            cursor.commit()
             return True
         except:
             return False
@@ -98,7 +97,7 @@ class Trabajadores:
     def actualizar(self, id):
         try:
             cursor.execute("update trabajadores set nombre = %s, usuario = %s, contrasena = %s, rol = %s, especialidad = %s, status = %s where id_trabajadores = %s", (self.nombre, self.usuario, self.contrasena, self.rol, self.especialidad or None, self.status, id))
-            conexion.commit()
+            cursor.commit()
             return True
         except:
             return False
@@ -107,7 +106,7 @@ class Trabajadores:
     def eliminar(id):
         try:
             cursor.execute("delete from trabajadores where id_trabajadores = %s", (id,))
-            conexion.commit()
+            cursor.commit()
             return True
         except:
             return False
