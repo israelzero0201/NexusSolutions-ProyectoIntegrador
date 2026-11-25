@@ -1,8 +1,8 @@
 from views.estilos import (enfocar_despues, Colors, Fonts, Sizes, primary_button, outline_button, danger_button, campo_formulario,
                            campo_select, marcar_error, deshabilitar, form_card, page_header, confirmar,
-                           salir_sin_guardar, dialogo, text_input, ctk, sidebar, header)
+                           salir_sin_guardar, dialogo, text_input, ctk, sidebar, header, ROLES)
 from configuraciones import sesion
-from configuraciones.permisos import ROLES, normalizar, descripcion_rol, puede
+from configuraciones.permisos import normalizar, descripcion_rol, puede
 from trabajadores.trabajadores import Trabajadores
 
 ESTADOS = {"activo": "Activo", "inactivo": "Inactivo"}

@@ -1,5 +1,7 @@
 {
     "version": "Alpha 0.6.1",
-    "modo": "Claro",
-    "color": "Azul Eclipcom"
+    "empresa": "Eclipcom",
+    "anio": 2026,
+    "modo": "Oscuro",
+    "color": "Morado"
 }

@@ -6,6 +6,7 @@ from configuraciones import generalConfiguracion, sesion, permisos
 
 MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio",
          "agosto", "septiembre", "octubre", "noviembre", "diciembre"]
+ROLES = ("Tecnico", "Ingeniero", "Administrativo")
 
 class Colors:
     PRIMARY_DARK = "#012F6B"      # Header y sidebar
